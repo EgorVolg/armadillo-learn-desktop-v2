@@ -2,10 +2,19 @@ use std::os::raw::c_void;
 use std::ptr::null_mut;
 use std::sync::atomic::{AtomicPtr, Ordering};
 use windows::Win32::Foundation::{LPARAM, LRESULT, WPARAM};
+use windows::Win32::UI::WindowsAndMessaging::MSLLHOOKSTRUCT;
 use windows::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx, DispatchMessageW, GetMessageW, HHOOK, MSG, SetWindowsHookExW, TranslateMessage,
     UnhookWindowsHookEx, WH_MOUSE_LL, WM_MBUTTONDOWN, WM_MBUTTONUP,
 };
+
+unsafe fn get_click_position(lparam: LPARAM) -> Option<(i32, i32)> {
+    if lparam.0 == 0 {
+        return None;
+    }
+    let info = unsafe { *(lparam.0 as *const MSLLHOOKSTRUCT) };
+    Some((info.pt.x, info.pt.y))
+}
 
 // Глобальная атомарная переменная для хранения дескриптора установленного хука мыши.
 // Используется AtomicPtr, так как дескриптор может быть доступен из разных потоков
@@ -33,7 +42,7 @@ pub fn start_mouse_hook() {
         // Возвращает false при получении WM_QUIT, после чего цикл завершается.
         while GetMessageW(&mut msg, None, 0, 0).into() {
             let _ = TranslateMessage(&msg); // Преобразует виртуальные клавиши в символы.
-            DispatchMessageW(&msg);        // Отправляет сообщение соответствующей оконной процедуре.
+            DispatchMessageW(&msg); // Отправляет сообщение соответствующей оконной процедуре.
         }
     }
 
@@ -64,12 +73,20 @@ unsafe extern "system" fn mouse_callback(code: i32, wparam: WPARAM, lparam: LPAR
     }
 
     // Извлекаем код сообщения мыши из wparam.
-    let msg = wparam.0 as u32;
+    if wparam.0 as u32 == WM_MBUTTONDOWN {
+        if let Some((x, y)) = unsafe { get_click_position(lparam) } {
+            println!("middle click at ({x}, {y})");
+        }
+        return LRESULT(1);
+    }
 
+    if wparam.0 as u32 == WM_MBUTTONUP {
+        return LRESULT(1);
+    }
     // Перехватываем нажатие и отпускание средней кнопки мыши (колесо).
     // При обнаружении события выводим сообщение и блокируем его (возвращаем 1),
     // чтобы средняя кнопка не срабатывала в других приложениях.
-    if msg == WM_MBUTTONDOWN || msg == WM_MBUTTONUP {
+    if wparam.0 as u32 == WM_MBUTTONDOWN || wparam.0 as u32 == WM_MBUTTONUP {
         println!("Mouse hook: MBUTTONDOWN or MBUTTONUP detected");
         return LRESULT(1);
     }
