@@ -12,9 +12,23 @@
   "app": {
     "windows": [
       {
-        "title": "armadillo-learn-desktop-v2",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "url": "index.html",
+        "title": "Armadillo Learn",
+        "width": 1200,
+        "height": 800
+      },
+      {
+        "label": "overlay",
+        "url": "overlay.html",
+        "title": "Armadillo Learn Overlay",
+        "width": 1920,
+        "height": 1080,
+        "transparent": true,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "visible": true,
+        "skipTaskbar": true
       }
     ],
     "security": {
