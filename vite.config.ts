@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-// @ts-expect-error type error without @types/node package
 import process from "node:process";
+import { resolve } from "node:path";
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
@@ -27,6 +27,15 @@ export default defineConfig(() => ({
     watch: {
       // 3. tell Vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
+    },
+  },
+
+  build: {
+    rollupOptions: {
+      input: {
+        overlay: resolve(__dirname, "overlay.html"),
+        main: resolve(__dirname, "index.html"),
+      },
     },
   },
 }));
