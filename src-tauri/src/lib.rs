@@ -1,6 +1,9 @@
 use tauri::Manager;
 
+use crate::ocr::init_ocr;
 mod mouse_hook;
+mod ocr;
+mod screenshot;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -11,8 +14,11 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
-            let overlay = app.get_webview_window("overlay").unwrap();
-            overlay.set_ignore_cursor_events(true).unwrap();
+            let _ = app
+                .get_webview_window("overlay")
+                .expect("no overlay window found")
+                .set_ignore_cursor_events(true)?;
+            let _ = init_ocr(app.handle());
             Ok(())
         })
         .run(tauri::generate_context!())

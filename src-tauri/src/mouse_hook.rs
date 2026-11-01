@@ -77,17 +77,11 @@ unsafe extern "system" fn mouse_callback(code: i32, wparam: WPARAM, lparam: LPAR
         if let Some((x, y)) = unsafe { get_click_position(lparam) } {
             println!("middle click at ({x}, {y})");
         }
+
         return LRESULT(1);
     }
 
     if wparam.0 as u32 == WM_MBUTTONUP {
-        return LRESULT(1);
-    }
-    // Перехватываем нажатие и отпускание средней кнопки мыши (колесо).
-    // При обнаружении события выводим сообщение и блокируем его (возвращаем 1),
-    // чтобы средняя кнопка не срабатывала в других приложениях.
-    if wparam.0 as u32 == WM_MBUTTONDOWN || wparam.0 as u32 == WM_MBUTTONUP {
-        println!("Mouse hook: MBUTTONDOWN or MBUTTONUP detected");
         return LRESULT(1);
     }
 
