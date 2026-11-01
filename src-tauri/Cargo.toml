@@ -30,6 +30,7 @@ windows = { version = "0.58", features = [
 ] }
 image = "0.25"
 glypho-ocr = { version = "0.2.1", features = ["cuda"] }
+screenshots = "0.8.10"
 
 [features]
 default = []
