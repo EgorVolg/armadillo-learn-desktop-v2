@@ -1,6 +1,9 @@
+use std::sync::Arc;
+
 use tauri::Manager;
 
-use crate::ocr::init_ocr;
+use crate::ocr::OcrState;
+
 mod mouse_hook;
 mod ocr;
 mod screenshot;
@@ -18,7 +21,8 @@ pub fn run() {
                 .get_webview_window("overlay")
                 .expect("no overlay window found")
                 .set_ignore_cursor_events(true)?;
-            let _ = init_ocr(app.handle());
+            let _ = Arc::new(OcrState::init(app.handle()));
+             
             Ok(())
         })
         .run(tauri::generate_context!())
